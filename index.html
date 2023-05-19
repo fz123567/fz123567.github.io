@@ -1,10 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>点击按钮显示 "test" 并隐藏按钮</title>
+  <title>定制化样式</title>
   <style>
-    #myButton {
-      display: block;
+    body {
+      background-color: yellow;
+    }
+
+    h1, button {
+      color: red;
+    }
+
+    button {
+      border-radius: 50%;
+      width: 100px;
+      height: 100px;
+    }
+
+    .container {
+      text-align: center;
+      margin-top: 50px;
     }
   </style>
   <script>
@@ -17,9 +32,11 @@
   </script>
 </head>
 <body>
-  <button id="myButton" onclick="showText()">test</button>
-  <div id="text" style="display: none;">
-    <h1>test</h1>
+  <div class="container">
+    <button id="myButton" onclick="showText()">test</button>
+    <div id="text" style="display: none;">
+      <h1>test</h1>
+    </div>
   </div>
 </body>
 </html>
