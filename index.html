@@ -36,7 +36,7 @@
       var buttonElement = document.getElementById("myButton");
       buttonElement.style.display = "none";
       var textElement = document.getElementById("text");
-      textElement.style.display = "none";
+      textElement.style.display = "block";
       var restoreButtonElement = document.getElementById("restoreButton");
       restoreButtonElement.style.display = "block";
     }
@@ -57,7 +57,7 @@
       <button id="myButton" onclick="showText()">test</button>
     </div>
     <div id="text" class="hidden centered">
-      <h1>test</h1>
+      <h1 style=“display：none;">test</h1>
     </div>
     <button id="restoreButton" class="hidden" onclick="restoreOriginal()">还原</button>
   </div>
