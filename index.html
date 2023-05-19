@@ -1,9 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>test</title>
+  <title>按钮点击显示 "test"</title>
+  <script>
+    function showText() {
+      var textElement = document.getElementById("text");
+      textElement.style.display = "block";
+    }
+  </script>
 </head>
 <body>
-  <h1>test</h1>
+  <button onclick="showText()">显示文本</button>
+  <div id="text" style="display: none;">
+    <h1>test</h1>
+  </div>
 </body>
 </html>
