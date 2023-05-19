@@ -21,6 +21,10 @@
       text-align: center;
       margin-top: 50px;
     }
+
+    .hidden {
+      display: none;
+    }
   </style>
   <script>
     function showText() {
@@ -28,15 +32,27 @@
       buttonElement.style.display = "none";
       var textElement = document.getElementById("text");
       textElement.style.display = "block";
+      var restoreButtonElement = document.getElementById("restoreButton");
+      restoreButtonElement.style.display = "block";
+    }
+
+    function restoreOriginal() {
+      var buttonElement = document.getElementById("myButton");
+      buttonElement.style.display = "block";
+      var textElement = document.getElementById("text");
+      textElement.style.display = "none";
+      var restoreButtonElement = document.getElementById("restoreButton");
+      restoreButtonElement.style.display = "none";
     }
   </script>
 </head>
 <body>
   <div class="container">
     <button id="myButton" onclick="showText()">test</button>
-    <div id="text" style="display: none;">
+    <div id="text" class="hidden">
       <h1>test</h1>
     </div>
+    <button id="restoreButton" class="hidden" onclick="restoreOriginal()">还原</button>
   </div>
 </body>
 </html>
