@@ -1,16 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>按钮点击显示 "test"</title>
+  <title>点击按钮显示 "test" 并隐藏按钮</title>
+  <style>
+    #myButton {
+      display: block;
+    }
+  </style>
   <script>
     function showText() {
+      var buttonElement = document.getElementById("myButton");
+      buttonElement.style.display = "none";
       var textElement = document.getElementById("text");
       textElement.style.display = "block";
     }
   </script>
 </head>
 <body>
-  <button onclick="showText()">显示文本</button>
+  <button id="myButton" onclick="showText()">test</button>
   <div id="text" style="display: none;">
     <h1>test</h1>
   </div>
