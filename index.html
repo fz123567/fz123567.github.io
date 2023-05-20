@@ -23,14 +23,12 @@
     }
 
     .hidden {
-      display: block;
+      display: none;
     }
 
     .centered {
       display: flex;
       justify-content: center;
-      align-items:center;
-      height:100vh;
     }
   </style>
   <script>
@@ -55,15 +53,13 @@
 </head>
 <body>
   <div class="container">
-    <div id="text" class="hidden centered">
-      <h1 style="display:none;">test</h1>
-    </div>
     <div class="centered">
       <button id="myButton" onclick="showText()">test</button>
-
-      <button id="restoreButton" class="hidden" onclick="restoreOriginal()">还原</button>
-</div>
     </div>
-    
+    <div id="text" class="hidden centered">
+      <h1 style="display: none;">test</h1>
+    </div>
+    <button id="restoreButton" class="hidden" onclick="restoreOriginal()">还原</button>
+  </div>
 </body>
 </html>
