@@ -48,10 +48,18 @@
     function showText() {
       var buttonElement = document.getElementById("myButton");
       buttonElement.style.display = "none";
-      var textElement = document.getElementById("text");
-      textElement.style.visibility = "visible";
       var restoreButtonElement = document.getElementById("restoreButton");
       restoreButtonElement.style.visibility = "visible";
+      var inputElement = document.getElementById('myInput');
+      var text = inputElement.value;
+
+      if (text === "test") {
+        var textElement = document.getElementById("text");
+        textElement.style.visibility = "visible";
+      } else {
+        var txetElement = document.getElementById("txet");
+        txetElement.style.visibility = "visible";
+      }
     }
 
     function restoreOriginal() {
