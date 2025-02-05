@@ -1,96 +1,439 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>定制化样式</title>
-  <style>
-  html, body {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-}
-.restore {
-  display: flex;
-  flex-direction: column;
-  margin-top: 10px;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>音游模拟器</title>
+    <style>
+        :root {
+            --judge-position: 85vh;
+            --note-speed: 0.7s;
+        }
 
-    body {
-      font-family: "Microsoft YaHei", Arial, sans-serif;
-      background-color: yellow;
-    }
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            touch-action: none;
+            font-family: Arial;
+        }
 
-    h1, button {
-      color: red;
-    }
+        #control-panel {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+        }
 
-    button {
-      border-radius: 50%;
-      width: 90px;
-      height: 90px;
-      font-size:22px;
-    }
+        .control-group {
+            margin: 10px 0;
+        }
 
-    .container {
-      text-align: center;
-      margin-top: 50px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+        button, select {
+            background: #2ecc71;
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
 
-    .hidden {
-      visibility: hidden;
-   {
-  </style>
-  <script>
-    function showText() {
-      var buttonElement = document.getElementById("myButton");
-      buttonElement.style.display = "none";
-      var restoreButtonElement = document.getElementById("restoreButton");
-      restoreButtonElement.style.visibility = "visible";
-      var inputElement = document.getElementById('myInput');
-      var text = inputElement.value;
+        button:hover, select:hover {
+            background: #27ae60;
+        }
 
-      if (text === "test") {
-        var textElement = document.getElementById("text");
-        textElement.style.visibility = "visible";
-      } else {
-        var txetElement = document.getElementById("txet");
-        txetElement.style.visibility = "visible";
-      }
-    }
+        #game-area {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            background: #111;
+            display: flex;
+        }
 
-    function restoreOriginal() {
-      var buttonElement = document.getElementById("myButton");
-      buttonElement.style.display = "block";
-      var textElement = document.getElementById("text");
-      textElement.style.visibility = "hidden";
-      var restoreButtonElement = document.getElementById("restoreButton");
-      restoreButtonElement.style.visibility = "hidden";
-      var txetElement = document.getElementById("txet");
-      txetElement.style.visibility = "hidden"
-    }
-  </script>
+        .track {
+            flex: 1;
+            height: 100%;
+            border-left: 2px solid #333;
+            border-right: 2px solid #333;
+            position: relative;
+            touch-action: none;
+        }
+
+        .note {
+            width: 80%;
+            height: 40px;
+            margin-left: 10%;
+            background: linear-gradient(90deg, #00ff88, #00ccff);
+            position: absolute;
+            border-radius: 5px;
+            animation: fall var(--note-speed) linear forwards;
+            box-shadow: 0 2px 10px rgba(0,255,200,0.3);
+        }
+
+        #judge-line {
+            width: 100%;
+            height: 5px;
+            background: #fff;
+            position: absolute;
+            bottom: 15vh;
+            left: 0;
+            box-shadow: 0 0 15px rgba(255,255,255,0.5);
+        }
+
+        #score {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 24px;
+            z-index: 100;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .judge-text {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 48px;
+            font-weight: bold;
+            animation: judgeScale 0.3s;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @keyframes fall {
+            from { top: -40px; }
+            to { top: var(--judge-position); }
+        }
+
+        @keyframes judgeScale {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(3); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        }
+    </style>
 </head>
 <body>
-  <label for="myInput"></label>
-  <input type="text" id="myInput" name="myInput" placeholder="请输入文本">
-  <div class="container">
-    <div class="centered">
-      <button id="myButton" onclick="showText()">test</button>
+    <div id="control-panel">
+        <div class="control-group">
+            <select id="mode-select">
+                <option value="random">随机模式</option>
+                <option value="chart">谱面模式</option>
+            </select>
+            <input type="file" id="chart-file" accept=".json" style="display: none;">
+            <button onclick="document.getElementById('chart-file').click()">导入谱面</button>
+            <button onclick="loadDemoChart()">加载示例</button>
+            <button onclick="resetGame()">重新开始</button>
+        </div>
+        <div id="chart-info"></div>
     </div>
-    <div id="text" class="hidden centered">
-      <h1>test</h1>
+    
+    <div id="score">连击: 0 | 得分: 0 | 准度: 100%</div>
+    <div id="game-area">
+        <div class="track"></div>
+        <div class="track"></div>
+        <div class="track"></div>
+        <div class="track"></div>
+        <div id="judge-line"></div>
     </div>
-    <div id="txet" class="hidden centered">
-      <h1>tset</h1>
-    </div>
-    <div class="restore">
-      <button id="restoreButton" class="hidden" onclick="restoreOriginal()">还原</button>
-    </div>
-  </div>
+
+    <script>
+        // 示例谱面数据
+        const DEMO_CHART = {
+            name: "示例谱面",
+            bpm: 128,
+            offset: 0,
+            notes: [
+                [1000, 0, 0],
+                [1200, 1, 0],
+                [1400, 2, 0],
+                [1600, 3, 0],
+                [2000, 0, 0],
+                [2000, 3, 0],
+                [2400, 1, 0],
+                [2400, 2, 0],
+                [3000, 0, 0],
+                [3000, 1, 0],
+                [3000, 2, 0],
+                [3000, 3, 0]
+            ]
+        };
+
+        const CONFIG = {
+            JUDGE_RANGE: { PERFECT: 30, GOOD: 80, MISS: 120 },
+            RANDOM_INTERVAL: { MIN: 200, MAX: 800 },
+            SCORE_VALUES: { PERFECT: 500, GOOD: 200, MISS: -100 },
+            COMBO_MULTIPLIER: 0.3
+        };
+
+        let gameState = {
+            combo: 0,
+            score: 0,
+            totalHits: 0,
+            notes: [],
+            noteId: 0,
+            currentMode: 'random',
+            chartData: null,
+            timer: null
+        };
+
+        // 初始化游戏
+        function init() {
+            initControls();
+            resetGame();
+        }
+
+        // 初始化控制
+        function initControls() {
+            document.getElementById('mode-select').addEventListener('change', function() {
+                gameState.currentMode = this.value;
+                resetGame();
+            });
+
+            document.getElementById('chart-file').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const chart = JSON.parse(event.target.result);
+                        loadChart(chart);
+                    } catch (error) {
+                        alert('谱面文件格式错误！');
+                    }
+                };
+                reader.readAsText(file);
+            });
+        }
+
+        // 重置游戏
+        function resetGame() {
+            // 清除现有状态
+            clearTimeout(gameState.timer);
+            gameState.notes.forEach(note => note.element.remove());
+            gameState = {
+                combo: 0,
+                score: 0,
+                totalHits: 0,
+                notes: [],
+                noteId: 0,
+                currentMode: gameState.currentMode,
+                chartData: gameState.chartData,
+                timer: null
+            };
+
+            // 更新显示
+            updateScore();
+            document.getElementById('chart-info').textContent = 
+                gameState.chartData ? `当前谱面: ${gameState.chartData.name}` : '';
+
+            // 开始新游戏
+            gameState.startTime = Date.now() + 2000;
+            if (gameState.currentMode === 'random') {
+                startRandomMode();
+            } else if (gameState.chartData) {
+                loadChart(gameState.chartData);
+            }
+            
+            setInterval(gameLoop, 16);
+        }
+
+        // 随机模式
+        function startRandomMode() {
+            function generate() {
+                const count = Math.floor(Math.random() * 3) + 1;
+                generateNotes(count);
+                
+                const nextInterval = CONFIG.RANDOM_INTERVAL.MIN + 
+                    Math.random() * (CONFIG.RANDOM_INTERVAL.MAX - CONFIG.RANDOM_INTERVAL.MIN);
+                gameState.timer = setTimeout(generate, nextInterval);
+            }
+            gameState.timer = setTimeout(generate, 1000);
+        }
+
+        // 加载谱面
+        function loadChart(chart) {
+            gameState.chartData = chart;
+            chart.notes.sort((a,b) => a[0] - b[0]);
+            scheduleNotes(chart.notes);
+        }
+
+        // 加载示例谱面
+        function loadDemoChart() {
+            gameState.currentMode = 'chart';
+            document.getElementById('mode-select').value = 'chart';
+            loadChart(DEMO_CHART);
+            resetGame();
+        }
+
+        // 安排音符
+        function scheduleNotes(notes) {
+            notes.forEach((noteData, index) => {
+                const [time, track, type] = noteData;
+                setTimeout(() => {
+                    createChartNote(track, type);
+                }, gameState.startTime + time - Date.now());
+            });
+        }
+
+        // 创建音符（共用逻辑）
+        function createNote(track) {
+            const note = document.createElement('div');
+            note.className = 'note';
+            document.querySelectorAll('.track')[track].appendChild(note);
+            return note;
+        }
+
+        // 创建谱面音符
+        function createChartNote(track, type) {
+            const note = createNote(track);
+            gameState.notes.push({
+                id: gameState.noteId++,
+                element: note,
+                track: track,
+                active: true,
+                judgeTime: Date.now() + 700
+            });
+        }
+        function gameLoop() {
+            const now = Date.now();
+            
+            gameState.notes = gameState.notes.filter(note => {
+                const timeDiff = now - note.judgeTime;
+                
+                // 自动Miss判定
+                if (timeDiff > CONFIG.JUDGE_RANGE.MISS) {
+                    note.element.remove();
+                    if(note.active) handleJudgement('MISS');
+                    return false;
+                }
+                return true;
+            });
+            
+            updateScore();
+        }
+
+        function handleInput(track) {
+            const now = Date.now();
+            let closestNote = null;
+            let minDiff = Infinity;
+
+            gameState.notes.forEach(note => {
+                if(note.track === track && note.active) {
+                    const diff = Math.abs(now - note.judgeTime);
+                    if(diff < minDiff) {
+                        minDiff = diff;
+                        closestNote = note;
+                    }
+                }
+            });
+
+            if(closestNote) {
+                const judgement = getJudgement(minDiff);
+                handleJudgement(judgement, closestNote);
+                showJudgeText(judgement);
+            }
+        }
+
+        function getJudgement(timeDiff) {
+            if(timeDiff <= CONFIG.JUDGE_RANGE.PERFECT) return 'PERFECT';
+            if(timeDiff <= CONFIG.JUDGE_RANGE.GOOD) return 'GOOD';
+            return 'MISS';
+        }
+
+        function handleJudgement(judgement, note = null) {
+            if(note) note.active = false;
+            
+            switch(judgement) {
+                case 'PERFECT':
+                    gameState.combo++;
+                    gameState.score += CONFIG.SCORE_VALUES.PERFECT + 
+                        Math.floor(gameState.combo * CONFIG.COMBO_MULTIPLIER);
+                    gameState.totalHits++;
+                    break;
+                case 'GOOD':
+                    gameState.combo++;
+                    gameState.score += CONFIG.SCORE_VALUES.GOOD + 
+                        Math.floor(gameState.combo * CONFIG.COMBO_MULTIPLIER);
+                    gameState.totalHits++;
+                    break;
+                case 'MISS':
+                    gameState.score += CONFIG.SCORE_VALUES.MISS;
+                    gameState.combo = 0;
+                    break;
+            }
+
+            if(note?.element) note.element.remove();
+        }
+
+        function showJudgeText(judgement) {
+            const colors = {
+                'PERFECT': '#00ff88',
+                'GOOD': '#4caf50',
+                'MISS': '#ff4757'
+            };
+            
+            const text = document.createElement('div');
+            text.className = 'judge-text';
+            text.textContent = judgement;
+            text.style.color = colors[judgement];
+            document.body.appendChild(text);
+            setTimeout(() => text.remove(), 300);
+        }
+
+        function updateScore() {
+            const accuracy = gameState.totalHits > 0 ? 
+                Math.min(100, Math.floor(
+                    (gameState.combo / gameState.totalHits) * 100
+                )) : 100;
+            
+            document.getElementById('score').textContent = 
+                `连击: ${gameState.combo} | 得分: ${gameState.score} | 准度: ${accuracy}%`;
+        }
+
+        function initControls() {
+            // 触控
+            document.querySelectorAll('.track').forEach((track, index) => {
+                track.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    handleInput(index);
+                });
+            });
+
+            // 键盘
+            const keyMap = { 'd':0, 'f':1, 'j':2, 'k':3 };
+            document.addEventListener('keydown', (e) => {
+                const track = keyMap[e.key.toLowerCase()];
+                if (track !== undefined) handleInput(track);
+            });
+        }
+
+        function shuffle(array) {
+            for(let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // 游戏主循环（保持不变）
+        // ...（保留之前的游戏循环、判定处理等逻辑）...
+
+        // 其他辅助函数（shuffle、updateScore等）
+        // ...（保留之前的辅助函数）...
+
+        // 初始化游戏
+        init();
+    </script>
 </body>
 </html>
